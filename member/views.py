@@ -36,3 +36,7 @@ def login(request):
     }
     return render(request,'member/login.html',ctx)
 
+def logout(request):
+    django_logout(request)
+    return redirect('post:post_list')
+
