@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login as django_login, logout as django_logout, authenticate
 
-from .forms import LoginForm
+from .forms import LoginForm, SignUpForm
 # Create your views here.
 
 def login(request):
@@ -39,4 +39,20 @@ def login(request):
 def logout(request):
     django_logout(request)
     return redirect('post:post_list')
+
+def signup(requset):
+    if requset.method == 'POST':
+        signup_form = SignUpForm(requset.POST)
+        #유효성 검사
+        if signup_form.is_valid():
+            #자체 메서드인 signup method실행
+            signup_form.signup()
+            return redirect('post:post_list')
+    else:
+        signup_form = SignUpForm()
+
+    ctx = {
+        'signup_form': signup_form,
+    }
+    return render(requset, 'member/signup.html', ctx)
 

@@ -5,14 +5,16 @@ from django.contrib.auth import get_user, get_user_model
 from django.contrib import messages
 
 from .models import Post, Comment
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
 
 # Create your views here.
 
 def post_list(request):
     posts = Post.objects.all()
+    comment_form = CommentForm()
     context = {
         'posts': posts,
+        'comment_form': comment_form,
     }
     return render(request, 'post/post_list.html', context)
 
@@ -52,6 +54,26 @@ def comment_create(request, post_pk):
                      for error in value]))
             messages.error(request, error_msg)
 
-        return redirect('post_list')
+        return redirect('post:post_list')
 
+
+def post_create(request):
+    if request.method == 'POST':
+        #Postform은 파일도 처리하므로 request.FILES 추가
+        post_form = PostForm(request.POST, request.FILES)
+        if post_form.is_valid():
+            post = post_form.save(commit=False)
+            post.author = get_user(request)
+            post.save()
+
+            messages.success(request, '사진이 등록되었습니다.')
+            return redirect('post:post_list')
+
+    else:
+        post_form = PostForm()
+
+    ctx = {
+        'post_form': post_form,
+    }
+    return render(request, 'post/post_create.html', ctx)
 
