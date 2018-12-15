@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Post List{% endblock %}
+{% block content %}
+<div>
+	{% for post in posts %}
+		{% include 'include/post.html' with post_type='list' %}
+	{% endfor %}
+</div>
+{% endblock %}
