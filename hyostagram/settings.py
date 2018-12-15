@@ -104,6 +104,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'member.User'
 
+LOGIN_REDIRECT_URL = 'post:post_list'
+
+LOGIN_URL = 'member:login'
+
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from .models import Post, Comment
 from .forms import CommentForm, PostForm
@@ -28,8 +29,11 @@ def post_detail(request, post_pk):
 
     return render(request, 'post/post_detail.html', context)
 
-
+@login_required
 def comment_create(request, post_pk):
+    # GET으로 전달된 값으로 완료 후 이동할 URL
+    next_path = request.GET.get('next')
+
     if request.method == 'POST':
         post = get_object_or_404(Post, pk=post_pk)
 
@@ -53,10 +57,12 @@ def comment_create(request, post_pk):
                      for key, value in comment_form.errors.items()
                      for error in value]))
             messages.error(request, error_msg)
-
+        #next파라미터가 있을 경우 지정된 이동 경로로 이동
+        if next_path:
+            return redirect(next_path)
         return redirect('post:post_list')
 
-
+@login_required
 def post_create(request):
     if request.method == 'POST':
         #Postform은 파일도 처리하므로 request.FILES 추가

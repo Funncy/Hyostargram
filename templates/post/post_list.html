@@ -4,7 +4,9 @@
 {% block content %}
 <div>
 	{% for post in posts %}
+        <div id="post-{{ post.pk }}">
 		{% include 'include/post.html' with post_type='list' %}
+        </div>
 	{% endfor %}
 </div>
 {% endblock %}
