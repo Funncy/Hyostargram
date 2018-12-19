@@ -5,6 +5,8 @@ from django.contrib.auth import get_user, get_user_model
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
+#from hyostagram.custom_login_required import custom_login_required
+
 from .models import Post, Comment
 from .forms import CommentForm, PostForm
 
@@ -33,6 +35,7 @@ def post_detail(request, post_pk):
 def comment_create(request, post_pk):
     # GET으로 전달된 값으로 완료 후 이동할 URL
     next_path = request.GET.get('next')
+
 
     if request.method == 'POST':
         post = get_object_or_404(Post, pk=post_pk)
