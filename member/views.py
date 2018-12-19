@@ -6,10 +6,17 @@ from .forms import LoginForm, SignUpForm
 
 def login(request):
     if request.method == 'POST':
+        #로그인 성공후 이동 url
+        next = request.GET.get('next')
+
         # Data bounded form 인스턴스 생성
-        login_form = LoginForm(request.POST)
+        #Authentication의 첫 파라미터는 무조건 request
+        login_form = LoginForm(request=request, data=request.POST)
         #유효성 검사
+        #AuthenticationForm을 사용하면 authenticate과정까지 완료되어야 된다
         if login_form.is_valid():
+            user = login_form.get_user()
+            '''
             # form 으로부터 아이디 , 비번 가져옴
             username = login_form.cleaned_data['username']
             password = login_form.cleaned_data['password']
@@ -20,7 +27,7 @@ def login(request):
                 username=username,
                 password=password
             )
-
+            
             #인증 성공
             if user:
                 django_login(request, user)
@@ -28,6 +35,12 @@ def login(request):
                 return redirect('post:post_list')
             #인증 실패
             login_form.add_error(None, '아이디 또는 비밀번호가 올바르지 않습니다.')
+            '''
+            #장고 auth앱에서 제공해주는 로그인 함수를 실행해 세션을 유지해준다
+            django_login(request, user)
+
+            return redirect(next if next else 'post:post_list')
+        login_form.add_error(None, '아이디 또는 비밀번호가 올바르지 않습니다.')
     else:  #GET방식 -> 즉 로그인 화면
         login_form = LoginForm()
 
@@ -45,9 +58,15 @@ def signup(requset):
         signup_form = SignUpForm(requset.POST)
         #유효성 검사
         if signup_form.is_valid():
+            #유저 생성 후 그 유저 로그인 시킨다.
+            user = signup_form.save()
+            django_login(requset, user)
+            return redirect('post:post_list')
+            '''
             #자체 메서드인 signup method실행
             signup_form.signup()
             return redirect('post:post_list')
+            '''
     else:
         signup_form = SignUpForm()
 

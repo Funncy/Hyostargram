@@ -5,7 +5,7 @@ from django.contrib.auth import get_user, get_user_model
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-#from hyostagram.custom_login_required import custom_login_required
+from hyostagram.custom_login_required import custom_login_required
 
 from .models import Post, Comment
 from .forms import CommentForm, PostForm
@@ -31,7 +31,7 @@ def post_detail(request, post_pk):
 
     return render(request, 'post/post_detail.html', context)
 
-@login_required
+@custom_login_required
 def comment_create(request, post_pk):
     # GET으로 전달된 값으로 완료 후 이동할 URL
     next_path = request.GET.get('next')
@@ -40,15 +40,14 @@ def comment_create(request, post_pk):
     if request.method == 'POST':
         post = get_object_or_404(Post, pk=post_pk)
 
-        user = get_user_model()
-        row = user.objects.get(pk=1)
+        user = get_user(request)
 
         comment_form = CommentForm(request.POST)
 
         if comment_form.is_valid():
             comment = comment_form.save(commit=False)
             comment.post = post
-            comment.author = row
+            comment.author = user
 
             comment.save()
 
@@ -64,8 +63,10 @@ def comment_create(request, post_pk):
         if next_path:
             return redirect(next_path)
         return redirect('post:post_list')
+    else:
+        return redirect('post:post_list')
 
-@login_required
+@custom_login_required
 def post_create(request):
     if request.method == 'POST':
         #Postform은 파일도 처리하므로 request.FILES 추가
@@ -86,3 +87,20 @@ def post_create(request):
     }
     return render(request, 'post/post_create.html', ctx)
 
+@custom_login_required
+def post_like_togle(request, post_pk):
+    next_url = request.GET.get('next')
+
+    post = get_object_or_404(Post, pk=post_pk)
+    user = get_user(request)
+
+    filtered_like_posts = user.like_posts.filter(pk=post.pk)
+
+    if filtered_like_posts.exists():
+        user.like_posts.remove(post)
+    else:
+        user.like_posts.add(post)
+
+    if next_url:
+        return redirect(next_url)
+    return redirect('post:post_detail', post_pk=post_pk)
